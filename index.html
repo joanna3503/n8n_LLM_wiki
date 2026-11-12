@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>n8n 自動化入門</title>
+<style>
+:root{color-scheme:light;--paper:#f8f6f0;--ink:#182833;--accent:#a33326;--rule:#c9c8bc;--mint:#e2ece5;font-family:Inter,"Microsoft JhengHei","PingFang TC",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:#192832;color:var(--ink)}button,summary{cursor:pointer}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #ba4a37;outline-offset:3px}
+main{margin:0 auto;width:min(100%,1260px);padding:clamp(10px,2vw,28px)}.slide{background:var(--paper);padding:clamp(24px,4vw,56px);min-height: min(70vh,650px);border-top:7px solid var(--accent);display:flex;flex-direction:column}.slide[hidden]{display:none}
+.eyebrow{color:var(--accent);font-size:.95rem;font-weight:750;margin:0 0 .5rem}h1{font-size:clamp(2rem,4.3vw,3.65rem);line-height:1.16;margin:0;letter-spacing:-.035em}h2{font-size:1.12em;margin:.75rem 0 .45rem}.lead{font-size:1.12em;margin:.55em 0 1.05em;color:#364c56}
+.content{font-size:clamp(1rem,1.65vw,1.34rem);line-height:1.55;min-width:0}.flow{display:flex;align-items:center;gap:.55em;flex-wrap:wrap;margin:.5em 0 1em}.flow strong{padding:.5em .75em;border-left:4px solid #46705d;background:var(--mint)}.flow span{color:var(--accent);font-weight:800}
+table{border-collapse:collapse;width:100%;text-align:left}th,td{padding:.43em .6em;border-bottom:1px solid var(--rule);vertical-align:top}th{background:var(--mint)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}.pair>*{min-width:0}pre{background:#20323a;color:#f9f5e6;padding:.75em .95em;margin:.45em 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.88em}dt{font-weight:700}dd{margin:0 0 .6em}.note{font-size:.85em;color:#425860}.quiz li{margin:.5em 0}
+.sources{margin-top:auto;padding-top:1.15rem;font-size:.85rem;display:flex;gap:.45rem .8rem;flex-wrap:wrap}.sources a{color:#274f43}.bar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding-top:.75rem;color:#fff}.bar button{font:inherit;padding:.45rem .75rem;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:4px}.bar button:disabled{opacity:.48;cursor:default}.bar>div{display:flex;gap:.5rem}.progress{height:4px;background:#45545e;margin-top:.75rem}.progress span{display:block;height:100%;background:#f07f68}
+@media(max-width:620px){.pair{grid-template-columns:1fr}.slide{padding:20px}.bar{flex-wrap:wrap}}@media print{body{background:white}main{padding:0;width:100%}.slide,.slide[hidden]{display:flex;break-after:page;min-height:90vh}.slide:last-of-type{break-after:auto}.bar,.progress{display:none}}
+.intro{display:grid;grid-template-columns:minmax(9em,1fr) 3fr;margin:0}.intro dt,.intro dd{border-bottom:1px solid var(--rule);padding:.55em .35em;margin:0}.takeaway{border-left:4px solid #46705d;padding:.48em .75em;background:var(--mint);margin:.75em 0 0;font-size:.91em}@media(max-width:620px){.intro{display:block}.intro dt{border-bottom:0}}
+</style>
+</head>
+<body>
+<main aria-label="n8n 教學投影片">
+<section class="slide" id="slide-1" aria-labelledby="title-1">
+<p class="eyebrow">入門</p><h1 id="title-1" tabindex="-1">n8n 是什麼？</h1>
+<div class="content"><p class="lead">n8n 是一款視覺化工作流程自動化工具。你可以在畫布上連接節點，讓資料在不同服務與處理步驟之間流動。</p><dl class="intro"><dt>Workflow · 工作流程</dt><dd>把原本需要反覆執行的步驟組成一條可重複執行的流程。</dd><dt>Node · 節點</dt><dd>每個節點負責一項工作，例如接收資料、整理欄位、判斷條件或呼叫外部服務。</dd><dt>適合自動化的工作</dt><dd>優先找重複發生、規則能說清楚，而且輸出可以檢查的工作。</dd></dl><p class="takeaway"><strong>本堂課路線</strong>　先看懂節點如何協作，再學 HTTP 串接、條件分流與 AI 分類。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://arthlai.com/blog/n8n-10-cases" target="_blank" rel="noopener">Arth Lai</a></footer>
+</section>
+<section class="slide" id="slide-2" aria-labelledby="title-2" hidden>
+<p class="eyebrow">入門</p><h1 id="title-2" tabindex="-1">工作流程的三個部分</h1>
+<div class="content"><p class="lead">讀一條工作流程時，可以先問：何時開始？資料怎麼變？結果去哪裡？</p><div class="flow"><strong>觸發 · Trigger</strong><span aria-hidden="true">→</span><strong>資料處理</strong><span aria-hidden="true">→</span><strong>輸出</strong></div><table><thead><tr><th scope="col">部分</th><th scope="col">負責什麼</th></tr></thead><tbody><tr><td>觸發</td><td>決定何時開始。可由人手動啟動、依排程執行，或等待外部事件。</td></tr><tr><td>處理</td><td>整理欄位、查詢其他資料，或用條件決定下一步。</td></tr><tr><td>輸出</td><td>指定結果的去向，例如回傳資料、寫入儲存位置或送出通知。</td></tr></tbody></table><p class="takeaway"><strong>讀圖順序</strong>　從觸發節點沿連線往下看，逐步確認每個節點收到什麼、交出什麼。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://arthlai.com/blog/n8n-10-cases" target="_blank" rel="noopener">Arth Lai</a></footer>
+</section>
+<section class="slide" id="slide-3" aria-labelledby="title-3" hidden>
+<p class="eyebrow">入門</p><h1 id="title-3" tabindex="-1">畫布、憑證與執行紀錄</h1>
+<div class="content"><p class="lead">設計、連線與排錯各有入口。</p><table><thead><tr><th scope="col">介面區域</th><th scope="col">你會在這裡做什麼</th></tr></thead><tbody><tr><td>畫布 · Canvas</td><td>放置並連接節點，查看資料處理順序</td></tr><tr><td>憑證 · Credentials</td><td>設定工作流程所需的外部服務連線</td></tr><tr><td>執行紀錄 · Executions</td><td>回看執行結果，找出錯誤出在哪個節點</td></tr></tbody></table><p class="note">介面功能示意</p><p class="takeaway"><strong>操作觀察</strong>　設計時先在畫布確認節點順序。執行後，從第一個輸出不符合預期的節點查起。若該步驟需要連線，再檢查它使用的憑證。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a></footer>
+</section>
+<section class="slide" id="slide-4" aria-labelledby="title-4" hidden>
+<p class="eyebrow">入門</p><h1 id="title-4" tabindex="-1">手動跑第一筆訂單</h1>
+<div class="content"><p class="lead">用 Edit Fields 把測試資料整理成後續節點需要的欄位。</p><div class="flow"><strong>Manual Trigger</strong><span aria-hidden="true">→</span><strong>Edit Fields</strong></div><div class="pair"><div><h2>有上游資料時的映射示意</h2><pre><code>{"order_no":"DEMO-001","qty":2}</code></pre></div><div><h2>預期輸出</h2><pre><code>{"orderId":"DEMO-001","quantity":2}</code></pre></div></div><p class="note">需要控制每批處理筆數時，可使用 Loop Over Items。</p><p class="takeaway"><strong>操作觀察</strong>　先在 Edit Fields 用固定值建立 orderId 和 quantity，觀察輸出。拿到上游資料後，再把 order_no 和 qty 映射成這兩個欄位，確認 quantity 仍是數字。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitinbatches" target="_blank" rel="noopener">n8n · Loop Over Items</a></footer>
+</section>
+<section class="slide" id="slide-5" aria-labelledby="title-5" hidden>
+<p class="eyebrow">串接</p><h1 id="title-5" tabindex="-1">讀懂一個 HTTP 請求</h1>
+<div class="content"><p class="lead">呼叫前先核對 API 文件允許的方法與資料格式。</p><table><thead><tr><th scope="col">欄位</th><th scope="col">要確認的事</th></tr></thead><tbody><tr><td>Method</td><td>GET 常用於讀取，POST 常用於提交</td></tr><tr><td>URL</td><td>要呼叫哪個端點</td></tr><tr><td>Headers</td><td>附帶哪些資訊，例如資料格式</td></tr><tr><td>Body</td><td>提交哪些欄位，例如訂單編號與數量</td></tr><tr><td>Response</td><td>如何從狀態碼與回應內容確認結果</td></tr></tbody></table><p class="takeaway"><strong>操作觀察</strong>　例如查庫存時，先核對 GET 的端點與查詢參數。收到回應後，再找出庫存欄位，交給後面的 If 比較。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://cms.ohya.co/n8n-ai-automation/what-is-api-http/" target="_blank" rel="noopener">好事發生數位</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest" target="_blank" rel="noopener">n8n · HTTP Request</a></footer>
+</section>
+<section class="slide" id="slide-6" aria-labelledby="title-6" hidden>
+<p class="eyebrow">串接</p><h1 id="title-6" tabindex="-1">HTTP Request 與 Webhook 的方向</h1>
+<div class="content"><p class="lead">先問誰發出請求。</p><h2>HTTP Request · n8n 查詢庫存</h2><div class="flow"><strong>n8n</strong><span aria-hidden="true">→</span><strong>GET 庫存</strong><span aria-hidden="true">→</span><strong>外部 API</strong></div><h2>Webhook · 商店通知新訂單</h2><div class="flow"><strong>外部商店</strong><span aria-hidden="true">→</span><strong>POST 訂單</strong><span aria-hidden="true">→</span><strong>n8n</strong></div><p class="note">回應沿相反方向返回呼叫端。</p><p class="takeaway"><strong>操作觀察</strong>　同一條流程可以先由 Webhook 接收訂單，再由 HTTP Request 查庫存。前者決定流程何時啟動，後者是啟動後的一個動作。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://cms.ohya.co/n8n-ai-automation/what-is-api-http/" target="_blank" rel="noopener">好事發生數位</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook" target="_blank" rel="noopener">n8n · Webhook</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.httprequest" target="_blank" rel="noopener">n8n · HTTP Request</a></footer>
+</section>
+<section class="slide" id="slide-7" aria-labelledby="title-7" hidden>
+<p class="eyebrow">串接</p><h1 id="title-7" tabindex="-1">接收訂單事件</h1>
+<div class="content"><p class="lead">先啟動測試監聽，再向 Test URL 送出 POST。</p><div class="pair"><div><h2>合成請求內容</h2><pre><code>{
+  "orderId": "DEMO-001",
+  "quantity": 2
+}</code></pre></div><div><h2>兩種端點</h2><dl><dt>Test URL</dt><dd>監聽期間測試，檢查節點收到的資料。</dd><dt>Production URL</dt><dd>發佈後用於正式呼叫，從執行紀錄檢查結果。</dd></dl></div></div><p class="note">流程示意。JSON 為測試資料。</p><p class="takeaway"><strong>操作觀察</strong>　若畫布沒有收到資料，依序確認監聽狀態、使用的網址、HTTP 方法，再檢查收到的 JSON 是否包含後續會用到的欄位。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://cms.ohya.co/n8n-ai-automation/what-is-api-http/" target="_blank" rel="noopener">好事發生數位</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook" target="_blank" rel="noopener">n8n · Webhook</a></footer>
+</section>
+<section class="slide" id="slide-8" aria-labelledby="title-8" hidden>
+<p class="eyebrow">應用</p><h1 id="title-8" tabindex="-1">如何挑第一個自動化題目</h1>
+<div class="content"><p class="lead">選擇重複、規則清楚，而且容易驗證的工作。</p><table><thead><tr><th scope="col">案例</th><th scope="col">輸入</th><th scope="col">要驗證的成果</th></tr></thead><tbody><tr><td>表單歸檔</td><td>表單提交</td><td>必填資料完整，正確寫入測試表</td></tr><tr><td>訂單分流</td><td>訂單與庫存</td><td>庫存足與不足各走對應分支</td></tr><tr><td>會議助理</td><td>會議逐字稿</td><td>輸出決策與行動項目，可回查內容</td></tr></tbody></table><p>先讓單一輸入與輸出跑通，再加入其他服務。</p><p class="takeaway"><strong>操作觀察</strong>　先定義成功條件，例如「必填欄位完整時才寫入一列」。用一筆正常輸入和一筆缺欄位的輸入檢查規則，再加通知。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://arthlai.com/blog/n8n-10-cases" target="_blank" rel="noopener">Arth Lai</a></footer>
+</section>
+<section class="slide" id="slide-9" aria-labelledby="title-9" hidden>
+<p class="eyebrow">應用</p><h1 id="title-9" tabindex="-1">庫存足夠時走哪一條路</h1>
+<div class="content"><p class="lead">查詢庫存後，讓 If 比較庫存與訂購數量。</p><div class="flow"><strong>訂單 quantity</strong><span aria-hidden="true">→</span><strong>模擬查庫存 stock</strong><span aria-hidden="true">→</span><strong>If · stock ≥ quantity</strong></div><table><thead><tr><th scope="col">合成輸入</th><th scope="col">預期結果</th></tr></thead><tbody><tr><td>訂購 2 件，庫存 5 件</td><td>True → 準備出貨</td></tr><tr><td>訂購 2 件，庫存 1 件</td><td>False → 標記待補貨</td></tr></tbody></table><p class="note">教學示意。分支只產生狀態。</p><p class="takeaway"><strong>操作觀察</strong>　再測一次庫存剛好等於訂購量的情況。依這個示範的 ≥ 條件，訂購 2 件、庫存 2 件也應走 True。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://arthlai.com/blog/n8n-10-cases" target="_blank" rel="noopener">Arth Lai</a></footer>
+</section>
+<section class="slide" id="slide-10" aria-labelledby="title-10" hidden>
+<p class="eyebrow">AI</p><h1 id="title-10" tabindex="-1">郵件先分類，再決定動作</h1>
+<div class="content"><p class="lead">模型提供分類值，流程依固定條件選擇下一步。</p><div class="flow"><strong>Gmail Trigger</strong><span aria-hidden="true">→</span><strong>Claude 分類</strong><span aria-hidden="true">→</span><strong>If 分流</strong></div><table><thead><tr><th scope="col">分類</th><th scope="col">示意動作</th></tr></thead><tbody><tr><td>客戶詢價</td><td>另外產生待確認的回信草稿</td></tr><tr><td>需本人處理</td><td>整理主旨和摘要，供 Slack 通知</td></tr></tbody></table><p class="note">文章也列出合作與垃圾信兩類，這兩類的後續動作待設計。</p><p class="takeaway"><strong>操作觀察</strong>　分類步驟只輸出類別。草擬回信或組成通知內容由後面的分支負責，方便分開檢查分類是否正確、動作是否合適。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://vocus.cc/article/6a1be5b5fd897800016df01b" target="_blank" rel="noopener">Slow Signals</a></footer>
+</section>
+<section class="slide" id="slide-11" aria-labelledby="title-11" hidden>
+<p class="eyebrow">AI</p><h1 id="title-11" tabindex="-1">如何檢查分類與分流</h1>
+<div class="content"><p class="lead">先用預設分類值驗證分支，再單獨驗證模型與草稿。</p><table><thead><tr><th scope="col">合成郵件或測試值</th><th scope="col">預期結果</th></tr></thead><tbody><tr><td>「請問服務報價？」 → 詢價</td><td>產生待確認的回信草稿</td></tr><tr><td>「請你本人確認這份合約」 → 需本人處理</td><td>產生主旨與摘要</td></tr><tr><td>未知分類</td><td>送人工檢查</td></tr></tbody></table><p class="note">預期結果為課程設計。使用外部模型時，送出的郵件內容會傳至該服務。</p><p class="takeaway"><strong>操作觀察</strong>　如果固定分類值走到錯誤分支，先檢查 If 的條件與欄位映射。如果固定值可以正常分流，再檢查模型是否回傳預期的類別。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://vocus.cc/article/6a1be5b5fd897800016df01b" target="_blank" rel="noopener">Slow Signals</a></footer>
+</section>
+<section class="slide" id="slide-12" aria-labelledby="title-12" hidden>
+<p class="eyebrow">延伸</p><h1 id="title-12" tabindex="-1">Codex CLI 如何連接 n8n</h1>
+<div class="content"><p class="lead">MCP 用戶端可使用伺服器開放的工具。</p><div class="flow"><strong>Codex CLI</strong><span aria-hidden="true">→</span><strong>n8n MCP Server</strong><span aria-hidden="true">→</span><strong>已開放的工作流程</strong></div><ol><li>在實例啟用 MCP 並取得完整 Server URL。</li><li>在 Codex CLI 登錄伺服器，使用 OAuth 授權。</li><li>檢查可見工具與工作流程是否符合預期範圍。</li></ol><p class="note">依官方文件整理。連線概念示意。</p><p class="takeaway"><strong>操作觀察</strong>　連線後可先確認預期的工具是否出現。如果看不到指定工作流程，檢查實例設定與該流程的存取範圍。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://docs.n8n.io/connect/connect-to-n8n-mcp-server/mcp-client-examples#connecting-codex-cli-to-n8n-mcp-server" target="_blank" rel="noopener">n8n · Codex MCP</a></footer>
+</section>
+<section class="slide" id="slide-13" aria-labelledby="title-13" hidden>
+<p class="eyebrow">回顧</p><h1 id="title-13" tabindex="-1">誰發起請求，下一步去哪裡</h1>
+<div class="content"><p class="lead">用三個問題回顧這筆訂單與郵件的旅程。</p><ol class="quiz"><li>商店送出新訂單事件，n8n 用哪一種節點接收？</li><li>n8n 主動查庫存，誰發出 HTTP 請求？</li><li>收到郵件分類結果後，哪個節點決定分支？</li></ol><details><summary>查看答案</summary><p>Webhook。n8n 的 HTTP Request 節點。If。</p></details><p class="takeaway"><strong>課後練習</strong>　選一項重複工作，寫下觸發時機、輸入欄位、處理規則和預期輸出，再設計一筆正常資料與一筆例外資料。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://cms.ohya.co/n8n-ai-automation/what-is-api-http/" target="_blank" rel="noopener">好事發生數位</a><a href="https://arthlai.com/blog/n8n-10-cases" target="_blank" rel="noopener">Arth Lai</a><a href="https://vocus.cc/article/6a1be5b5fd897800016df01b" target="_blank" rel="noopener">Slow Signals</a><a href="https://docs.n8n.io/connect/connect-to-n8n-mcp-server/mcp-client-examples#connecting-codex-cli-to-n8n-mcp-server" target="_blank" rel="noopener">n8n · Codex MCP</a></footer>
+</section>
+<div class="progress" aria-hidden="true"><span id="progress"></span></div>
+<nav class="bar" aria-label="投影片控制">
+<div><button type="button" id="prev">上一頁</button><button type="button" id="next">下一頁</button></div>
+<output id="position" aria-live="polite"></output>
+<div><button type="button" id="full">全螢幕</button></div>
+</nav>
+</main>
+<script>
+const slides = [...document.querySelectorAll('.slide')];
+const prev = document.getElementById('prev');
+const next = document.getElementById('next');
+const full = document.getElementById('full');
+const position = document.getElementById('position');
+const progress = document.getElementById('progress');
+let current = 0;
+
+function show(index, focus = false) {
+  current = Math.max(0, Math.min(index, slides.length - 1));
+  slides.forEach((slide, i) => { slide.hidden = i !== current; });
+  prev.disabled = current === 0;
+  next.disabled = current === slides.length - 1;
+  position.value = (current + 1) + ' / ' + slides.length;
+  progress.style.width = ((current + 1) / slides.length * 100) + '%';
+  if (location.hash !== '#' + slides[current].id) {
+    history.replaceState(null, '', '#' + slides[current].id);
+  }
+  if (focus) slides[current].querySelector('h1').focus({ preventScroll: true });
+  window.scrollTo(0, 0);
+}
+
+function syncHash() {
+  const match = /^#slide-(\d+)$/.exec(location.hash);
+  show(match ? Number(match[1]) - 1 : 0);
+}
+
+prev.addEventListener('click', () => show(current - 1, true));
+next.addEventListener('click', () => show(current + 1, true));
+window.addEventListener('hashchange', syncHash);
+document.addEventListener('keydown', event => {
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+  const offsets = { ArrowRight: 1, ArrowLeft: -1, PageDown: 1, PageUp: -1 };
+  const index = event.key === 'Home' ? 0 : event.key === 'End' ? slides.length - 1
+    : offsets[event.key] === undefined ? null : current + offsets[event.key];
+  if (index === null) return;
+  event.preventDefault();
+  show(index, true);
+});
+full.hidden = !document.fullscreenEnabled;
+full.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch {
+    full.textContent = '全螢幕無法使用';
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  full.textContent = document.fullscreenElement ? '離開全螢幕' : '全螢幕';
+});
+syncHash();
+</script>
+</body>
+</html>
