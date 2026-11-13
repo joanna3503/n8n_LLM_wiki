@@ -77,8 +77,8 @@ table{border-collapse:collapse;width:100%;text-align:left}th,td{padding:.43em .6
 </section>
 <section class="slide" id="slide-4" aria-labelledby="title-4" hidden>
 <p class="eyebrow">入門</p><h1 id="title-4" tabindex="-1">手動跑第一筆訂單</h1>
-<div class="content"><p class="lead">用 Edit Fields 把測試資料整理成後續節點需要的欄位。</p><div class="flow"><strong>Manual Trigger</strong><span aria-hidden="true">→</span><strong>Edit Fields</strong></div><div class="pair"><div><h2>有上游資料時的映射示意</h2><pre><code>{"order_no":"DEMO-001","qty":2}</code></pre></div><div><h2>預期輸出</h2><pre><code>{"orderId":"DEMO-001","quantity":2}</code></pre></div></div><p class="note">需要控制每批處理筆數時，可使用 Loop Over Items。</p><p class="takeaway"><strong>操作觀察</strong>　先在 Edit Fields 用固定值建立 orderId 和 quantity，觀察輸出。拿到上游資料後，再把 order_no 和 qty 映射成這兩個欄位，確認 quantity 仍是數字。</p></div>
-<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a><a href="https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.splitinbatches" target="_blank" rel="noopener">n8n · Loop Over Items</a></footer>
+<div class="content"><p class="lead">用 Edit Fields 把測試資料整理成後續節點需要的欄位。</p><div class="flow"><strong>Manual Trigger</strong><span aria-hidden="true">→</span><strong>Edit Fields</strong></div><div class="pair"><div><h2>有上游資料時的映射示意</h2><pre><code>{"order_no":"DEMO-001","qty":2}</code></pre></div><div><h2>預期輸出</h2><pre><code>{"orderId":"DEMO-001","quantity":2}</code></pre></div></div><p class="takeaway"><strong>操作觀察</strong>　先在 Edit Fields 用固定值建立 orderId 和 quantity，觀察輸出。拿到上游資料後，再把 order_no 和 qty 映射成這兩個欄位，確認 quantity 仍是數字。</p></div>
+<footer class="sources" aria-label="本頁來源"><a href="https://raymondhouch.com/lifehacker/digital-workflow/n8n-beginner-guide/" target="_blank" rel="noopener">雷蒙</a></footer>
 </section>
 <section class="slide" id="slide-5" aria-labelledby="title-5" hidden>
 <p class="eyebrow">串接</p><h1 id="title-5" tabindex="-1">讀懂一個 HTTP 請求</h1>
